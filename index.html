@@ -123,11 +123,37 @@ h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(36px, 4.4vw, 
 .ecran-plin { border: 2px solid var(--cerneala); background: var(--alb); border-radius: 14px; height: 64px; padding: 0 16px; font-weight: 600; }
 
 @media (max-width: 860px) {
-  body { overflow: auto; }
-  .app { height: auto; min-height: 100%; }
-  .ecran { grid-template-columns: minmax(0, 1fr); }
-  .rama { max-width: 340px; }
+  body { overflow: auto; font-size: 18px; }
+  .app { height: auto; min-height: 100%; display: block; }
+  .antet { gap: 10px; }
+  .marca { font-size: 22px; width: 100%; }
+  .fila { padding: 7px 14px; font-size: 17px; }
   .scor { width: 100%; }
+  .echipa { flex: 1; min-width: 0; justify-content: space-between; padding: 4px 4px 4px 10px; }
+  .echipa b { font-size: 13px; letter-spacing: .04em; white-space: nowrap; }
+  .echipa output { font-size: 24px; }
+  .echipa button { width: 34px; height: 34px; font-size: 20px; }
+  .scena { overflow: visible; padding-block: 16px 8px; }
+  .ecran { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .rama { max-width: 100%; }
+  h1 { font-size: 64px; }
+  h2 { font-size: 34px; }
+  .text { font-size: 20px; }
+  .citat { padding: 12px 14px; }
+  .citat .vorbe { font-size: 21px; }
+  .carte h3 { font-size: 24px; }
+  .carte p { font-size: 18px; }
+  .intrebare { font-size: 24px; padding-left: 14px; }
+  .optiuni { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .optiune { font-size: 21px; padding: 16px 8px; }
+  .pas { font-size: 19px; padding: 10px 12px; }
+  .pas .nr { width: 38px; height: 38px; font-size: 20px; }
+  .raspuns { font-size: 19px; }
+  .mare { font-size: 18px; padding: 10px 16px; }
+  .subsol { position: sticky; bottom: 0; z-index: 5; background: var(--hartie); padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)); }
+  .puncte-nav, .ecran-plin { display: none; }
+  .numar { flex: 1; text-align: center; font-size: 17px; }
+  .nav { width: 76px; height: 54px; font-size: 30px; }
 }
 @media (prefers-reduced-motion: reduce) { .ecran { animation: none; } }
 </style>
@@ -295,7 +321,7 @@ function deseneazaLectie() {
   stanga += `</div>`;
   const dreapta = e.poza ? rama(e.poza, e.leg, e.lata) : "";
   scena.innerHTML = `<section class="ecran${dreapta ? "" : " fara-poza"}">${stanga}${dreapta}</section>`;
-  scena.scrollTop = 0;
+  scena.scrollTop = 0; window.scrollTo(0, 0);
   scena.querySelectorAll(".citat").forEach(b => b.addEventListener("click", () => { b.dataset.ascuns = b.dataset.ascuns === "true" ? "false" : "true"; }));
   scena.querySelectorAll(".carte").forEach(b => b.addEventListener("click", () => b.classList.toggle("ascunsa")));
   $("#numar").textContent = `${index + 1} / ${ECRANE.length}`;
@@ -337,7 +363,7 @@ function deseneazaJoc() {
       <div class="rand-btn"><button class="mare usor" id="anterior">Întrebarea anterioară</button><button class="mare" id="urmator">Întrebarea următoare</button></div>`;
   }
   scena.innerHTML = `<section class="ecran fara-poza"><div>${meniu}${corp}</div></section>`;
-  scena.scrollTop = 0;
+  scena.scrollTop = 0; window.scrollTo(0, 0);
   scena.querySelectorAll("[data-joc]").forEach(b => b.addEventListener("click", () => { joc = b.dataset.joc; if (joc === "drum" && !drumAmestecat.length) reiaDrum(); deseneazaJoc(); }));
   legaPuncte();
   if (joc === "cine") {
