@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ghiță, Moara cu noroc</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;0,800;1,400&family=Alegreya+Sans:wght@400;600;800&display=swap">
+<style>
+/* Lecție pentru tabla interactivă: un ecran întreg, butoane mari, se atinge cu degetul. Hârtie rece de manual vechi, cerneală, roșu de sânge pentru final și auriu de bani. */
+:root {
+  --hartie: #EDF0EA;
+  --hartie-2: #E1E6DD;
+  --cerneala: #1C2420;
+  --cerneala-2: #4A5650;
+  --sange: #8B2B26;
+  --aur: #8A6417;
+  --linie: #C3CCC3;
+  --alb: #F8FAF6;
+  --bine: #2F6B3F;
+  --rau: #A23A2E;
+  --serif: "Alegreya", Georgia, "Times New Roman", serif;
+  --sans: "Alegreya Sans", "Segoe UI", Arial, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--hartie); color: var(--cerneala); font-family: var(--sans); font-size: 20px; overflow: hidden; }
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--aur); outline-offset: 3px; }
+
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Antet: titlu, file, scor */
+.antet { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 12px; border-bottom: 2px solid var(--cerneala); }
+.marca { font-family: var(--serif); font-weight: 800; font-size: 26px; letter-spacing: .02em; margin-right: auto; }
+.marca span { color: var(--sange); }
+.file { display: flex; gap: 6px; }
+.fila { border: 2px solid var(--cerneala); background: transparent; padding: 8px 18px; border-radius: 999px; font-weight: 600; font-size: 19px; }
+.fila[aria-pressed="true"] { background: var(--cerneala); color: var(--hartie); }
+.scor { display: flex; gap: 10px; }
+.echipa { display: flex; align-items: center; gap: 6px; border: 2px solid var(--linie); background: var(--alb); border-radius: 14px; padding: 4px 6px 4px 12px; }
+.echipa b { font-size: 17px; text-transform: uppercase; letter-spacing: .08em; color: var(--cerneala-2); }
+.echipa output { font-family: var(--serif); font-weight: 800; font-size: 30px; min-width: 1.6ch; text-align: center; font-variant-numeric: tabular-nums; }
+.echipa button { width: 40px; height: 40px; border-radius: 10px; border: 0; background: var(--hartie-2); font-size: 24px; font-weight: 800; }
+.echipa.a { border-color: var(--aur); }
+.echipa.b { border-color: var(--sange); }
+
+/* Scena */
+.scena { min-height: 0; overflow: auto; padding-block: 22px; }
+.ecran { max-width: 1500px; margin: 0 auto; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); align-items: start; animation: intra .35s ease both; }
+.ecran.fara-poza { grid-template-columns: minmax(0, 1fr); }
+@keyframes intra { from { opacity: .4; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.spranceana { font-size: 17px; letter-spacing: .14em; text-transform: uppercase; color: var(--sange); font-weight: 800; }
+h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(56px, 8vw, 120px); line-height: .95; margin: 8px 0 12px; text-wrap: balance; }
+h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(36px, 4.4vw, 60px); line-height: 1.05; margin: 6px 0 14px; text-wrap: balance; }
+.text { font-size: clamp(22px, 1.9vw, 28px); line-height: 1.45; max-width: 60ch; color: var(--cerneala); }
+.text p { margin: 0 0 12px; }
+.text ul { margin: 0 0 12px; padding-left: 1.1em; }
+.text li { margin-bottom: 6px; }
+.text em { font-family: var(--serif); }
+
+/* Citate: ascunse, apar la atingere */
+.citate { display: grid; gap: 14px; margin-top: 8px; }
+.citat { position: relative; text-align: left; width: 100%; border: 2px dashed var(--cerneala-2); background: var(--alb); border-radius: 16px; padding: 16px 20px; min-height: 76px; }
+.citat .cine { font-size: 16px; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; color: var(--cerneala-2); }
+.citat .vorbe { display: block; font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2vw, 30px); line-height: 1.35; margin-top: 4px; }
+.citat .unde { display: block; font-size: 16px; color: var(--cerneala-2); margin-top: 6px; }
+.citat[data-ascuns="true"] .vorbe, .citat[data-ascuns="true"] .unde { display: none; }
+.citat[data-ascuns="true"]::after { content: "Atinge ca să apară citatul"; display: block; font-size: 20px; color: var(--aur); font-weight: 600; margin-top: 4px; }
+.citat[data-ascuns="false"] { border-style: solid; border-color: var(--cerneala); border-left: 8px solid var(--sange); }
+
+/* Poze */
+.rama { margin: 0; border: 2px solid var(--cerneala); background: var(--hartie-2); border-radius: 6px; padding: 8px; }
+.rama img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 3px; }
+.rama.lata img { aspect-ratio: 4 / 3; }
+.rama figcaption { font-size: 16px; color: var(--cerneala-2); padding: 8px 4px 2px; }
+.monograma { display: grid; place-items: center; aspect-ratio: 3 / 4; background: repeating-linear-gradient(135deg, var(--hartie-2) 0 14px, var(--hartie) 14px 28px); font-family: var(--serif); font-weight: 800; font-size: 120px; color: var(--cerneala-2); border-radius: 3px; }
+.rama.lata .monograma { aspect-ratio: 4 / 3; }
+
+/* Trăsături și mijloace */
+.grila { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.carte { border: 2px solid var(--linie); background: var(--alb); border-radius: 14px; padding: 16px 18px; text-align: left; }
+.carte h3 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; }
+.carte p { margin: 0; font-size: 20px; line-height: 1.4; color: var(--cerneala-2); }
+.carte.ascunsa p { visibility: hidden; }
+.carte.ascunsa::after { content: "Atinge"; color: var(--aur); font-weight: 600; font-size: 18px; }
+.portrete { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+
+/* Jocuri */
+.jocuri { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.joc-btn { border: 2px solid var(--cerneala); background: var(--alb); border-radius: 12px; padding: 10px 18px; font-weight: 600; font-size: 20px; }
+.joc-btn[aria-pressed="true"] { background: var(--aur); color: var(--alb); border-color: var(--aur); }
+.intrebare { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 3vw, 44px); line-height: 1.3; border-left: 8px solid var(--aur); padding: 8px 0 8px 22px; margin: 6px 0 22px; max-width: 46ch; }
+.optiuni { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; max-width: 1100px; }
+.optiune { border: 2px solid var(--cerneala); background: var(--alb); border-radius: 16px; padding: 22px 16px; font-size: 28px; font-weight: 800; }
+.optiune.corect { background: var(--bine); border-color: var(--bine); color: var(--alb); }
+.optiune.gresit { background: var(--rau); border-color: var(--rau); color: var(--alb); }
+.raspuns { margin-top: 18px; font-size: 24px; line-height: 1.4; max-width: 60ch; min-height: 2.8em; }
+.raspuns b { color: var(--sange); }
+.puncte { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.puncte button { border: 2px solid var(--cerneala); background: var(--alb); border-radius: 12px; padding: 10px 16px; font-weight: 600; font-size: 20px; }
+.contor { font-size: 18px; color: var(--cerneala-2); margin-bottom: 4px; }
+.ordine { display: grid; gap: 10px; max-width: 1100px; }
+.pas { display: flex; gap: 14px; align-items: center; text-align: left; border: 2px solid var(--linie); background: var(--alb); border-radius: 14px; padding: 12px 16px; font-size: 23px; line-height: 1.3; }
+.pas .nr { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--cerneala-2); display: grid; place-items: center; font-family: var(--serif); font-weight: 800; font-size: 24px; }
+.pas.ales { border-color: var(--aur); }
+.pas.ales .nr { background: var(--aur); border-color: var(--aur); color: var(--alb); }
+.pas.bine { border-color: var(--bine); }
+.pas.bine .nr { background: var(--bine); border-color: var(--bine); }
+.pas.rau { border-color: var(--rau); }
+.pas.rau .nr { background: var(--rau); border-color: var(--rau); }
+.rand-btn { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.mare { border: 0; background: var(--cerneala); color: var(--hartie); border-radius: 12px; padding: 12px 22px; font-weight: 800; font-size: 22px; }
+.mare.usor { background: var(--hartie-2); color: var(--cerneala); }
+
+/* Subsol: navigare */
+.subsol { display: flex; align-items: center; gap: 14px; padding-block: 10px; border-top: 2px solid var(--cerneala); }
+.nav { width: 84px; height: 64px; border-radius: 14px; border: 2px solid var(--cerneala); background: var(--alb); font-size: 34px; font-weight: 800; }
+.nav:disabled { opacity: .35; cursor: default; }
+.puncte-nav { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; justify-content: center; min-width: 0; }
+.punct { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--cerneala-2); background: transparent; padding: 0; }
+.punct[aria-current="true"] { background: var(--sange); border-color: var(--sange); }
+.numar { font-variant-numeric: tabular-nums; color: var(--cerneala-2); font-size: 18px; min-width: 5ch; text-align: right; }
+.ecran-plin { border: 2px solid var(--cerneala); background: var(--alb); border-radius: 14px; height: 64px; padding: 0 16px; font-weight: 600; }
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .app { height: auto; min-height: 100%; }
+  .ecran { grid-template-columns: minmax(0, 1fr); }
+  .rama { max-width: 340px; }
+  .scor { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .ecran { animation: none; } }
+</style>
+
+<div class="app">
+  <header class="antet">
+    <div class="marca">Ghiță <span>·</span> Moara cu noroc</div>
+    <nav class="file" aria-label="Părțile lecției">
+      <button class="fila" id="fila-lectie" aria-pressed="true">Lecția</button>
+      <button class="fila" id="fila-joc" aria-pressed="false">Jocul clasei</button>
+    </nav>
+    <div class="scor" aria-label="Scorul echipelor">
+      <div class="echipa a"><b>Echipa 1</b><button id="a-minus" aria-label="Scade un punct echipei 1">−</button><output id="scor-a">0</output><button id="a-plus" aria-label="Adaugă un punct echipei 1">+</button></div>
+      <div class="echipa b"><b>Echipa 2</b><button id="b-minus" aria-label="Scade un punct echipei 2">−</button><output id="scor-b">0</output><button id="b-plus" aria-label="Adaugă un punct echipei 2">+</button></div>
+    </div>
+  </header>
+
+  <main class="scena" id="scena" aria-live="polite"></main>
+
+  <footer class="subsol" id="subsol">
+    <button class="nav" id="inapoi" aria-label="Ecranul anterior">‹</button>
+    <div class="puncte-nav" id="puncte-nav"></div>
+    <span class="numar" id="numar"></span>
+    <button class="ecran-plin" id="ecran-plin">Ecran întreg</button>
+    <button class="nav" id="inainte" aria-label="Ecranul următor">›</button>
+  </footer>
+</div>
+
+<script>
+window.IMAGINI = {};
+</script>
+<script>
+const IMG = window.IMAGINI || {};
+
+// Citatele sunt luate cuvânt cu cuvânt din text (ro.wikisource.org, „Moara cu noroc”, Ioan Slavici, 1881).
+const ECRANE = [
+  { tip: "coperta", spr: "Ioan Slavici · Moara cu noroc · 1881", titlu: "Ghiță", text: "<p>Caracterizarea personajului principal: un om cinstit care se pierde, pas cu pas, din dragoste pentru bani.</p><p>Atingeți citatele ca să apară. La final jucăm pe echipe.</p>", poza: "han", lata: true, leg: "Hanul de la Moara cu noroc, la răscruce, în pustă" },
+  { spr: "Capitolul I", titlu: "Cine este Ghiță", text: "<ul><li>Personaj principal, <em>rotund</em>: se schimbă de la un capitol la altul.</li><li>La început e cizmar sărac; ia în arendă cârciuma de la Moara cu noroc.</li><li>Prin el, Slavici arată ce face <em>banul</em> din om.</li></ul>",
+    citate: [
+      { cine: "Bătrâna, soacra lui Ghiță", vorbe: "Omul să fie mulțumit cu sărăcia sa, căci, dacă e vorba, nu bogăția, ci liniștea colibei tale te face fericit.", unde: "Cap. I, primele cuvinte ale nuvelei" },
+      { cine: "Ghiță", vorbe: "Atunci să nu mai pierdem vorba degeaba: mă duc să vorbesc cu arândașul, și de la Sf. Gheorghe cârciuma de la Moara cu noroc e a noastră.", unde: "Cap. I" } ], poza: "ghita", leg: "Ghiță, cârciumarul" },
+  { spr: "Capitolul II", titlu: "La început: harnic și fericit", text: "<p>Cârciuma merge bine, oamenii vin la el ca la un prieten. Familia e unită.</p>",
+    citate: [
+      { cine: "Naratorul", vorbe: "drumeții mai umblați nu mai ziceau că o să facă popas la Moara cu noroc, ci că se vor opri la Ghiță", unde: "Cap. II" },
+      { cine: "Naratorul", vorbe: "Ana era tânără și frumoasă, Ana era fragedă și subțirică, Ana era sprintenă și mlădioasă, iară el însuși, înalt și spătos, o purta ca pe o pană subțirică.", unde: "Cap. II (portretul lui Ghiță și al Anei)" } ], poza: "ana", leg: "Ana, soția lui Ghiță" },
+  { spr: "Capitolul III", titlu: "Vine Lică Sămădăul", text: "<p>Lică stăpânește drumurile și turmele de porci din pustă. Nimeni nu poate ține cârciuma fără voia lui.</p>",
+    citate: [
+      { cine: "Lică", vorbe: "Eu sunt Lică, sămădăul... Multe se zic despre mine, și dintre multe, multe vor fi adevărate și multe scornite.", unde: "Cap. III" },
+      { cine: "Naratorul", vorbe: "pentru ca să poți sta la Moara cu noroc, mai trebuie să te faci și om al lui Lică.", unde: "Cap. IV" } ], poza: "lica", leg: "Lică Sămădăul" },
+  { spr: "Capitolul IV", titlu: "Ispita banului", text: "<p>Ghiță vede câștigul și, pentru prima oară, familia îi pare o piedică. Aici începe conflictul interior.</p>",
+    citate: [
+      { cine: "Naratorul", vorbe: "Ghiță întâia oară în viața lui ar fi voit să n-aibă nevastă și copii, pentru ca să poată zice: \"Prea puțin îmi pasă!\"", unde: "Cap. IV" },
+      { cine: "Naratorul", vorbe: "vedea banii grămadă înaintea sa și i se împăienjeneau parcă ochii", unde: "Cap. IV" } ] },
+  { spr: "Capitolul IV", titlu: "Omul se schimbă", text: "<p>Caracterizare <em>directă</em>, făcută de narator: Ghiță devine ursuz, iute la mânie, străin de ai lui.</p>",
+    citate: [
+      { cine: "Naratorul", vorbe: "acum el se făcuse mai de tot ursuz, se aprindea pentru orișice lucru de nimic, nu mai zâmbea ca mai nainte, ci râdea cu hohot, încât îți venea să te sperii de el", unde: "Cap. IV" } ] },
+  { spr: "Capitolul V", titlu: "Înfruntarea cu Lică", text: "<p>Caracterizare <em>indirectă</em>, prin vorbe: Ghiță știe ce pierde, dar nu se poate rupe.</p>",
+    citate: [
+      { cine: "Ghiță, către Lică", vorbe: "Îmi iai banii: să-ți fie de bine! Mi-ai luat liniștea sufletului și mi-ai stricat viața: să-ți fie de bine!", unde: "Cap. V" },
+      { cine: "Ghiță, către Lică", vorbe: "Gândește-te că tu m-ai făcut să nu mai am multe de pierdut și bagă de seamă să nu mai pierd și cele ce am! Să-ți fie frică de mine!", unde: "Cap. V" } ] },
+  { spr: "Capitolul VII", titlu: "Singur între Ana și Pintea", text: "<p>Se înstrăinează de Ana și caută sprijin la Pintea, jandarmul. Monologul interior îi arată îndoiala.</p>",
+    citate: [
+      { cine: "Naratorul", vorbe: "Ana, pe care o privea cu atâta drag mai nainte, încetul cu încetul se înstrăinase de dânsul și nu mai era veselă ca mai nainte", unde: "Cap. VII" },
+      { cine: "Ghiță, în gând", vorbe: "Adică de ce să pun eu mai multă încredere într-un om străin decât în nevasta mea!?", unde: "Cap. VII" } ] },
+  { spr: "Capitolele VIII și XIV", titlu: "Ce văd ceilalți în el", text: "<p>Caracterizare <em>directă</em>, făcută de alte personaje: bătrâna îl iartă, Ana îl disprețuiește.</p>",
+    citate: [
+      { cine: "Bătrâna", vorbe: "Ghiță e om harnic și sârguitor și așa se gândește mereu ca să adune ceva pentru casa lui. Are și el, ca tot omul, o slăbiciune: îi râde inima când își vede sporul.", unde: "Cap. VIII" },
+      { cine: "Ana, către Lică", vorbe: "Tu ești om, Lică, iară Ghiță nu e decât o muiere îmbrăcată în haine bărbătești, ba chiar mai rău decât așa.", unde: "Cap. XIV" } ], poza: "ana", leg: "Ana" },
+  { spr: "Capitolul XI", titlu: "Judecata și remușcarea", text: "<p>Autocaracterizare: Ghiță își vede vina, dar nu se oprește.</p>",
+    citate: [
+      { cine: "Ghiță, către Ana", vorbe: "Iartă-mă, Ano! [...] Iartă-mă cel puțin tu, căci eu n-am să mă iert cât voi trăi pe fața pământului.", unde: "Cap. XI" },
+      { cine: "Ghiță, către Ana", vorbe: "Și n-am păcătuit nimic, Ano, dar cerul m-a lovit cu orbie și n-am voit să cred și să înțeleg când mi-ai arătat calea cea bună.", unde: "Cap. XI" } ] },
+  { spr: "Capitolele XIV și XVI", titlu: "Căderea", text: "<p>Ghiță dă vina pe soartă, o lasă pe Ana singură cu Lică, apoi, gelos și disperat, o ucide.</p>",
+    citate: [
+      { cine: "Ghiță", vorbe: "Se vede că acesta e norocul meu, și dac-ar fi nenorocirea mea; cine poate să scape de soarta ce-i este scrisă!?", unde: "Cap. XIV" },
+      { cine: "Ghiță, către Ana", vorbe: "N-am să te chinuiesc: am să te omor cum mi-aș omorî copilul meu când ar trebui să-l scap de chinurile călăului", unde: "Cap. XVI" } ] },
+  { spr: "Capitolele XVI și XVII", titlu: "Finalul: focul", text: "<p>Ghiță moare împușcat de Răuț, la porunca lui Lică. Cârciuma arde. Lică își sfărâmă capul de un stejar ca să nu fie prins.</p>",
+    citate: [
+      { cine: "Lică", vorbe: "Dă foc!", unde: "Cap. XVI" },
+      { cine: "Bătrâna", vorbe: "Simțeam eu că nu are să iasă bine; dar așa le-a fost dat!...", unde: "Cap. XVII, ultimele cuvinte ale nuvelei" } ], poza: "foc", lata: true, leg: "Moara cu noroc în flăcări" },
+  { tip: "trasaturi", spr: "Pe scurt", titlu: "Trăsăturile lui Ghiță", carti: [
+      ["Harnic", "La început muncește și cârciuma prosperă (cap. II)."],
+      ["Iubitor de familie", "Se bucură de Ana și de copii (cap. II)."],
+      ["Lacom", "„Vedea banii grămadă înaintea sa” (cap. IV)."],
+      ["Orgolios", "Vrea să pară mai tare decât Lică (cap. V)."],
+      ["Însingurat", "Nu mai vorbește cu Ana, ascunde totul (cap. VII)."],
+      ["Slab, nehotărât", "Se tot gândește să meargă la Pintea, dar nu spune tot."],
+      ["Gelos, violent", "O ucide pe Ana (cap. XVI)."],
+      ["Personaj tragic", "Își vede greșeala, dar nu se mai poate opri."] ] },
+  { tip: "mijloace", spr: "Cum îl cunoaștem", titlu: "Mijloace de caracterizare", carti: [
+      ["Directă, de narator", "„se făcuse mai de tot ursuz” (cap. IV)."],
+      ["Directă, de alte personaje", "Bătrâna: „om harnic și sârguitor”; Ana: „o muiere îmbrăcată în haine bărbătești”."],
+      ["Autocaracterizare", "„cerul m-a lovit cu orbie” (cap. XI)."],
+      ["Prin fapte", "Acceptă tovărășia cu Lică, minte, o lasă pe Ana singură."],
+      ["Prin limbaj", "Vorbe aspre și amenințări către Lică (cap. V)."],
+      ["Monolog interior", "Gândurile lui despre Ana și Pintea (cap. VII)."] ] },
+  { tip: "portrete", spr: "Cei trei", titlu: "Ghiță, Ana și Lică" },
+  { spr: "Concluzie", titlu: "De ce cade Ghiță", text: "<p>Ghiță nu e un om rău, ci un om slab. Banul îi ia liniștea, familia și viața.</p><p>Nuvela se închide în cerc: începe și se termină cu vorbele bătrânei. „Nu bogăția, ci liniștea colibei tale te face fericit.”</p>", poza: "scena", lata: true, leg: "Ghiță, Ana și Lică" }
+];
+
+const PORTRETE = [
+  { poza: "ghita", nume: "Ghiță", rand: "Cizmarul devenit cârciumar. Cinstit la început, pierdut de lăcomie." },
+  { poza: "ana", nume: "Ana", rand: "Soția lui: tânără, frumoasă, fidelă, apoi rănită și înșelată." },
+  { poza: "lica", nume: "Lică Sămădăul", rand: "„înalt, uscățiv și supt la față, cu mustața lungă, cu ochii mici și verzi” (cap. III)." }
+];
+
+const CINE_A_SPUS = [
+  { v: "Omul să fie mulțumit cu sărăcia sa, căci, dacă e vorba, nu bogăția, ci liniștea colibei tale te face fericit.", r: "Bătrâna", u: "Cap. I. Sunt primele cuvinte ale nuvelei." },
+  { v: "Eu sunt Lică, sămădăul... Multe se zic despre mine, și dintre multe, multe vor fi adevărate și multe scornite.", r: "Lică", u: "Cap. III. Așa se prezintă Lică la prima venire." },
+  { v: "Mi-ai luat liniștea sufletului și mi-ai stricat viața: să-ți fie de bine!", r: "Ghiță", u: "Cap. V. Ghiță către Lică." },
+  { v: "Bine, maică, [...] dar dacă el ar începe să caute câștig nelegiuit? E vorba și de noi; ar trebui să ne spună și nouă ce face.", r: "Ana", u: "Cap. VIII. Ana își spune îngrijorarea bătrânei." },
+  { v: "Are și el, ca tot omul, o slăbiciune: îi râde inima când își vede sporul.", r: "Bătrâna", u: "Cap. VIII. Bătrâna îl apără pe Ghiță." },
+  { v: "Iartă-mă, Ano! [...] Iartă-mă cel puțin tu, căci eu n-am să mă iert cât voi trăi pe fața pământului.", r: "Ghiță", u: "Cap. XI. După judecată." },
+  { v: "Să te ferească Dumnezeu de oamenii care au slăbiciune de vreo muiere!", r: "Lică", u: "Cap. XIV." },
+  { v: "Tu ești om, Lică, iară Ghiță nu e decât o muiere îmbrăcată în haine bărbătești.", r: "Ana", u: "Cap. XIV. Ana, către Lică." },
+  { v: "[...] cine poate să scape de soarta ce-i este scrisă!?", r: "Ghiță", u: "Cap. XIV. Ghiță dă vina pe soartă." },
+  { v: "Dă foc!", r: "Lică", u: "Cap. XVI. Porunca lui Lică; Răuț îl împușcă pe Ghiță." },
+  { v: "Simțeam eu că nu are să iasă bine; dar așa le-a fost dat!...", r: "Bătrâna", u: "Cap. XVII. Ultimele cuvinte ale nuvelei." }
+];
+const OPTIUNI = ["Ghiță", "Ana", "Lică", "Bătrâna"];
+
+const DRUM = [
+  "Ghiță lasă cizmăria și ia în arendă cârciuma, deși bătrâna îl avertizează.",
+  "Cârciuma merge bine și familia e fericită.",
+  "Vine Lică și îi cere să fie omul lui.",
+  "Ghiță acceptă tovărășia, ispitit de câștig.",
+  "Ajunge la judecată și îi cere iertare Anei.",
+  "O lasă pe Ana singură cu Lică, apoi o ucide.",
+  "Moare împușcat de Răuț, iar cârciuma arde."
+];
+
+const ADEVARAT = [
+  { a: "Înainte de Moara cu noroc, Ghiță era cizmar.", r: true, e: "Adevărat. În cap. I spune că ar putea „să cârpesc și mai departe cizmele oamenilor”." },
+  { a: "Bătrâna îl încurajează din toată inima să plece la cârciumă.", r: false, e: "Fals. Bătrâna îl avertizează: „nu bogăția, ci liniștea colibei tale te face fericit”, dar merge cu ei." },
+  { a: "Lică e un porcar bogat și temut, care stăpânește drumurile.", r: true, e: "Adevărat. „Nu putea să stea nimeni fără voia lui Lică” (cap. IV)." },
+  { a: "Pintea, jandarmul, îl ucide pe Lică.", r: false, e: "Fals. Lică își sfărâmă capul de un stejar uscat, ca să nu fie prins (cap. XVI)." },
+  { a: "Ghiță o ucide pe Ana.", r: true, e: "Adevărat. Gelos și disperat, o ucide cu cuțitul (cap. XVI)." },
+  { a: "La final, cârciuma de la Moara cu noroc arde.", r: true, e: "Adevărat. Lică dă foc, iar a doua zi rămân doar zidurile afumate (cap. XVII)." },
+  { a: "Ghiță își recunoaște vina la judecată.", r: true, e: "Adevărat. „Iartă-mă, Ano! [...] eu n-am să mă iert cât voi trăi” (cap. XI)." }
+];
+
+const $ = (s) => document.querySelector(s);
+const scena = $("#scena");
+let mod = "lectie", index = 0, joc = "cine";
+let scor = { a: 0, b: 0 };
+
+function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function rama(cheie, leg, lata) {
+  const src = IMG[cheie];
+  const interior = src ? `<img src="${src}" alt="${esc(leg || cheie)}">` : `<div class="monograma" aria-hidden="true">${esc((leg || cheie).charAt(0))}</div>`;
+  return `<figure class="rama${lata ? " lata" : ""}">${interior}${leg ? `<figcaption>${esc(leg)}</figcaption>` : ""}</figure>`;
+}
+function citatHTML(c, i) {
+  return `<button class="citat" data-ascuns="true" data-i="${i}"><span class="cine">${esc(c.cine)}</span><span class="vorbe">„${esc(c.vorbe)}”</span><span class="unde">${esc(c.unde)}</span></button>`;
+}
+
+function deseneazaLectie() {
+  const e = ECRANE[index];
+  let stanga = `<div><div class="spranceana">${esc(e.spr)}</div>`;
+  stanga += e.tip === "coperta" ? `<h1>${esc(e.titlu)}</h1>` : `<h2>${esc(e.titlu)}</h2>`;
+  if (e.text) stanga += `<div class="text">${e.text}</div>`;
+  if (e.citate) stanga += `<div class="citate">${e.citate.map(citatHTML).join("")}</div>`;
+  if (e.carti) stanga += `<div class="grila">${e.carti.map(([t, p]) => `<button class="carte ascunsa"><h3>${esc(t)}</h3><p>${esc(p)}</p></button>`).join("")}</div>`;
+  if (e.tip === "portrete") stanga += `<div class="portrete">${PORTRETE.map(p => `<div>${rama(p.poza, p.nume)}<p class="text" style="font-size:22px;margin-top:10px">${esc(p.rand)}</p></div>`).join("")}</div>`;
+  stanga += `</div>`;
+  const dreapta = e.poza ? rama(e.poza, e.leg, e.lata) : "";
+  scena.innerHTML = `<section class="ecran${dreapta ? "" : " fara-poza"}">${stanga}${dreapta}</section>`;
+  scena.scrollTop = 0;
+  scena.querySelectorAll(".citat").forEach(b => b.addEventListener("click", () => { b.dataset.ascuns = b.dataset.ascuns === "true" ? "false" : "true"; }));
+  scena.querySelectorAll(".carte").forEach(b => b.addEventListener("click", () => b.classList.toggle("ascunsa")));
+  $("#numar").textContent = `${index + 1} / ${ECRANE.length}`;
+  $("#inapoi").disabled = index === 0;
+  $("#inainte").disabled = index === ECRANE.length - 1;
+  document.querySelectorAll(".punct").forEach((p, i) => p.setAttribute("aria-current", i === index ? "true" : "false"));
+}
+
+// Jocuri
+let cineI = 0, adevI = 0, drumAles = [], drumAmestecat = [];
+function amesteca(a) { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function butoanePuncte() { return `<div class="puncte"><button data-p="a">+1 Echipa 1</button><button data-p="b">+1 Echipa 2</button></div>`; }
+function legaPuncte() { scena.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => schimbaScor(b.dataset.p, 1))); }
+
+function deseneazaJoc() {
+  const meniu = `<div class="jocuri" role="group" aria-label="Alege jocul">
+    <button class="joc-btn" data-joc="cine" aria-pressed="${joc === "cine"}">Cine a spus?</button>
+    <button class="joc-btn" data-joc="drum" aria-pressed="${joc === "drum"}">Drumul lui Ghiță</button>
+    <button class="joc-btn" data-joc="adev" aria-pressed="${joc === "adev"}">Adevărat sau fals</button></div>`;
+  let corp = "";
+  if (joc === "cine") {
+    const q = CINE_A_SPUS[cineI];
+    corp = `<div class="contor">Citatul ${cineI + 1} din ${CINE_A_SPUS.length}</div><h2>Cine a spus?</h2>
+      <p class="intrebare">„${esc(q.v)}”</p>
+      <div class="optiuni">${OPTIUNI.map(o => `<button class="optiune" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+      <div class="raspuns" id="raspuns"></div>${butoanePuncte()}
+      <div class="rand-btn"><button class="mare usor" id="anterior">Citatul anterior</button><button class="mare" id="urmator">Citatul următor</button></div>`;
+  } else if (joc === "drum") {
+    corp = `<h2>Drumul lui Ghiță</h2><p class="text">Atingeți momentele în ordinea din nuvelă. Apoi apăsați „Verifică”.</p>
+      <div class="ordine">${drumAmestecat.map(i => { const poz = drumAles.indexOf(i); return `<button class="pas${poz >= 0 ? " ales" : ""}" data-d="${i}"><span class="nr">${poz >= 0 ? poz + 1 : ""}</span><span>${esc(DRUM[i])}</span></button>`; }).join("")}</div>
+      <div class="raspuns" id="raspuns"></div>${butoanePuncte()}
+      <div class="rand-btn"><button class="mare" id="verifica">Verifică</button><button class="mare usor" id="reia">Amestecă din nou</button></div>`;
+  } else {
+    const q = ADEVARAT[adevI];
+    corp = `<div class="contor">Întrebarea ${adevI + 1} din ${ADEVARAT.length}</div><h2>Adevărat sau fals?</h2>
+      <p class="intrebare">${esc(q.a)}</p>
+      <div class="optiuni"><button class="optiune" data-af="1">Adevărat</button><button class="optiune" data-af="0">Fals</button></div>
+      <div class="raspuns" id="raspuns"></div>${butoanePuncte()}
+      <div class="rand-btn"><button class="mare usor" id="anterior">Întrebarea anterioară</button><button class="mare" id="urmator">Întrebarea următoare</button></div>`;
+  }
+  scena.innerHTML = `<section class="ecran fara-poza"><div>${meniu}${corp}</div></section>`;
+  scena.scrollTop = 0;
+  scena.querySelectorAll("[data-joc]").forEach(b => b.addEventListener("click", () => { joc = b.dataset.joc; if (joc === "drum" && !drumAmestecat.length) reiaDrum(); deseneazaJoc(); }));
+  legaPuncte();
+  if (joc === "cine") {
+    const q = CINE_A_SPUS[cineI];
+    scena.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
+      const bun = b.dataset.o === q.r;
+      b.classList.add(bun ? "corect" : "gresit");
+      if (!bun) scena.querySelector(`[data-o="${q.r}"]`).classList.add("corect");
+      $("#raspuns").innerHTML = `${bun ? "<b>Corect!</b>" : "<b>Nu.</b>"} L-a spus ${esc(q.r === "Bătrâna" ? "bătrâna" : q.r)}. ${esc(q.u)}`;
+    }));
+    $("#anterior").onclick = () => { cineI = (cineI - 1 + CINE_A_SPUS.length) % CINE_A_SPUS.length; deseneazaJoc(); };
+    $("#urmator").onclick = () => { cineI = (cineI + 1) % CINE_A_SPUS.length; deseneazaJoc(); };
+  } else if (joc === "drum") {
+    scena.querySelectorAll("[data-d]").forEach(b => b.addEventListener("click", () => {
+      const i = +b.dataset.d, p = drumAles.indexOf(i);
+      if (p >= 0) drumAles.splice(p, 1); else drumAles.push(i);
+      deseneazaJoc();
+    }));
+    $("#verifica").onclick = () => {
+      let bune = 0;
+      scena.querySelectorAll("[data-d]").forEach(b => { const i = +b.dataset.d, p = drumAles.indexOf(i); b.classList.remove("ales"); const ok = p === i; if (ok) bune++; b.classList.add(ok ? "bine" : "rau"); b.querySelector(".nr").textContent = i + 1; });
+      $("#raspuns").innerHTML = bune === DRUM.length ? "<b>Perfect!</b> Toate momentele sunt la locul lor." : `<b>${bune} din ${DRUM.length}</b> la locul lor. Numerele arată acum ordinea corectă.`;
+    };
+    $("#reia").onclick = () => { reiaDrum(); deseneazaJoc(); };
+  } else {
+    const q = ADEVARAT[adevI];
+    scena.querySelectorAll("[data-af]").forEach(b => b.addEventListener("click", () => {
+      const ales = b.dataset.af === "1", bun = ales === q.r;
+      b.classList.add(bun ? "corect" : "gresit");
+      if (!bun) scena.querySelector(`[data-af="${q.r ? 1 : 0}"]`).classList.add("corect");
+      $("#raspuns").innerHTML = `${bun ? "<b>Corect!</b>" : "<b>Nu.</b>"} ${esc(q.e)}`;
+    }));
+    $("#anterior").onclick = () => { adevI = (adevI - 1 + ADEVARAT.length) % ADEVARAT.length; deseneazaJoc(); };
+    $("#urmator").onclick = () => { adevI = (adevI + 1) % ADEVARAT.length; deseneazaJoc(); };
+  }
+}
+function reiaDrum() { drumAles = []; drumAmestecat = amesteca(DRUM.map((_, i) => i)); }
+
+function schimbaScor(e, d) { scor[e] = Math.max(0, scor[e] + d); $("#scor-a").textContent = scor.a; $("#scor-b").textContent = scor.b; }
+$("#a-plus").onclick = () => schimbaScor("a", 1); $("#a-minus").onclick = () => schimbaScor("a", -1);
+$("#b-plus").onclick = () => schimbaScor("b", 1); $("#b-minus").onclick = () => schimbaScor("b", -1);
+
+function aratăMod(m) {
+  mod = m;
+  $("#fila-lectie").setAttribute("aria-pressed", m === "lectie");
+  $("#fila-joc").setAttribute("aria-pressed", m === "joc");
+  $("#subsol").style.visibility = m === "lectie" ? "visible" : "hidden";
+  if (m === "lectie") deseneazaLectie(); else { if (!drumAmestecat.length) reiaDrum(); deseneazaJoc(); }
+}
+$("#fila-lectie").onclick = () => aratăMod("lectie");
+$("#fila-joc").onclick = () => aratăMod("joc");
+$("#inapoi").onclick = () => { if (index > 0) { index--; deseneazaLectie(); } };
+$("#inainte").onclick = () => { if (index < ECRANE.length - 1) { index++; deseneazaLectie(); } };
+$("#puncte-nav").innerHTML = ECRANE.map((_, i) => `<button class="punct" aria-label="Ecranul ${i + 1}" data-n="${i}"></button>`).join("");
+$("#puncte-nav").querySelectorAll(".punct").forEach(p => p.addEventListener("click", () => { index = +p.dataset.n; deseneazaLectie(); }));
+$("#ecran-plin").onclick = () => { const el = document.documentElement; if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {}); else if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); };
+document.addEventListener("keydown", (ev) => {
+  if (mod !== "lectie") return;
+  if (ev.key === "ArrowRight" || ev.key === "PageDown" || ev.key === " ") { ev.preventDefault(); $("#inainte").click(); }
+  if (ev.key === "ArrowLeft" || ev.key === "PageUp") { ev.preventDefault(); $("#inapoi").click(); }
+});
+aratăMod("lectie");
+</script>
+
+</html>
